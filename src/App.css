@@ -1,0 +1,103 @@
+html{
+    cursor: none;
+  }
+  
+  
+  
+  /* Scroll bar */
+  
+  body::-webkit-scrollbar{
+    width: 10px;
+    padding: 1px 0;
+    background-color: #413f3f;
+  }
+  
+  body::-webkit-scrollbar-thumb{
+    /* border-radius: 19px; */
+    background-color: #034e35;
+  }
+  
+  /* Mouse */
+  
+  .mouse{
+    background-color: rgba(10, 156, 107, 0.5)
+  }
+  
+  /* darkMode */
+  
+  
+  .dark{
+    background-color: #222222;
+  }
+  
+  .input {
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  input-box:focus {
+    border: 1px solid gray;
+  }
+  
+  .panel {
+    background: linear-gradient(to right, #0db199 ,#067457);
+    padding: auto;
+    box-shadow: 5px 5px 5px rgb(182, 179, 179);
+  }
+  
+  .handcraft:hover{
+    border: 3px solid rgb(20, 109, 20);
+  }
+  
+  
+  /* React-tabs */
+  
+  .react-tabs__tab--selected {
+    background: none;
+    border-color: none;
+    color: rgba(10, 156, 107, 0.803);
+    border-radius: 5px 5px 0 0;
+    text-decoration: underline;
+  }
+  
+  
+  /* Responsive media 768px */
+  
+  @media screen and (max-width: 768px) {
+    .panel-text {
+      width: 50%;
+    }
+  
+    /* Slider */
+  
+    .slider-img{
+      height: 200px;
+      width: 200px;
+    }
+  
+  }
+  
+  
+  /* Responsive media 426px */
+  
+  
+  @media screen and (max-width: 426px) {
+    .panel{
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-text {
+      width: 100%;
+    }
+  
+    /* Image Slider */
+  
+    .slider-box{
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  
