@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# Starbucks clone
-=======
 # Starbucks clone 
->>>>>>> 9efa575b36563c5381b4ab9885a7c932352c60c2
 
 A responsive Starbucks website clone built using React.js and Tailwind CSS, featuring a dynamic shopping cart with local storage integration.
 
