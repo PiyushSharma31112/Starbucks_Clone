@@ -70,7 +70,8 @@ function Pay() {
       {/* Popup */}
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-1/3">
+          <div className="bg-[#f2f0eb] rounded-lg shadow-lg w-11/12 md:w-1/3">
+            
             {/* Popup Header */}
             <div className="flex justify-between items-center border-b px-4 py-2">
               <h3 className="text-lg font-bold text-starbucks-green">Login</h3>
