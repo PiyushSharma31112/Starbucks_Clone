@@ -1,9 +1,7 @@
 import christmasBlend from "../../assets/OrderImage/coffeeathome/christmasBlend.png"
 import christmasBlend2 from "../../assets/OrderImage/coffeeathome/christmasBlend2.png"
 import diwaliBlend from "../../assets/OrderImage/coffeeathome/diwaliblend.jpg"
-import blend from "../../assets/OrderImage/coffeeathome/blend.svg"
 import diwaliBlend2 from "../../assets/OrderImage/coffeeathome/diwaliBlend2.png"
-
 
 export const coffeeData = [
     {
