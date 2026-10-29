@@ -1,12 +1,29 @@
-import React, { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import starbucksLogo from "../../assets/starbucksLogo.png"
 import { CiSearch } from "react-icons/ci";
 import { FaUserCircle } from "react-icons/fa";
 import { CiMenuBurger, CiShoppingCart } from "react-icons/ci";
 import  Pay  from "../Pages/Pay";
+import { getCurrentUser, logoutUser } from "../auth/auth.js";
 
 function Header() {
+  const [currentUser, setCurrentUser] = useState(getCurrentUser);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const syncCurrentUser = () => {
+      setCurrentUser(getCurrentUser());
+      setIsUserMenuOpen(false);
+    };
+
+    window.addEventListener("starbucks:auth-change", syncCurrentUser);
+    window.addEventListener("storage", syncCurrentUser);
+    return () => {
+      window.removeEventListener("starbucks:auth-change", syncCurrentUser);
+      window.removeEventListener("storage", syncCurrentUser);
+    };
+  }, []);
 
   // Search bar functionality
 
@@ -76,10 +93,9 @@ function Header() {
             >
               Order
             </NavLink>
-            <button //onClick={toggleClose}
-              className="font-light text-lg text-gray-500 py-2 hover:text-stabucks">
+            <div className="font-light text-lg text-gray-500 py-2 hover:text-stabucks">
               <Pay />
-            </button>
+            </div>
             <NavLink
               to="/store"
               className={({ isActive }) =>
@@ -117,8 +133,40 @@ function Header() {
             
           {/* User Icon */}
           
-          <div className="relative ml-5 cursor-pointer w-[10%] text-center flex justify-center items-center ">
-            <FaUserCircle size="25px" />
+          <div className="relative ml-5 flex w-[10%] items-center justify-center text-center sm:w-auto">
+            {currentUser ? (
+              <>
+                <button
+                  type="button"
+                  aria-label={`Account menu for ${currentUser.name}`}
+                  aria-expanded={isUserMenuOpen}
+                  onClick={() => setIsUserMenuOpen((isOpen) => !isOpen)}
+                  className="flex items-center gap-2 text-gray-600 hover:text-starbucks-green"
+                >
+                  <FaUserCircle size="25px" />
+                  <span className="hidden max-w-28 truncate text-sm xl:inline">{currentUser.name}</span>
+                </button>
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-gray-200 bg-white p-3 text-left shadow-lg">
+                    <p className="truncate font-medium text-gray-900">{currentUser.name}</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logoutUser();
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="mt-3 w-full rounded-md px-3 py-2 text-left text-sm font-medium text-green-800 hover:bg-gray-100"
+                    >
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <NavLink to="/login" aria-label="Login" className="text-gray-600 hover:text-starbucks-green">
+                <FaUserCircle size="25px" />
+              </NavLink>
+            )}
           </div>
           
           <div className='relative ml-5 cursor-pointer w-[10%] text-center flex justify-center items-center '>

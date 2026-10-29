@@ -1,21 +1,9 @@
-import React, { useRef, useState } from 'react'
+import { useState } from 'react'
 import { toast } from "react-toastify"
 import { NavLink } from 'react-router-dom'
 import { FaEye, FaEyeSlash  } from "react-icons/fa";
+import { loginUser } from "../auth/auth.js";
 
-
-const InputField = ({type, placeholder, value, name, onChange }) => {
-  return (
-    <input
-      type = {type}
-      placeholder={placeholder}
-      value={value}
-      name={name}
-      onChange={onChange}
-      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-    />
-  );
-};
 
 function Pay() {
 
@@ -38,20 +26,30 @@ function Pay() {
     username: "",
     password: ""
   })
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submitForm = (e) => {
+  const submitForm = async (e) => {
     e.preventDefault()
-    console.log(userLogin)
-
-    setUserLogin({
-      username: "",
-      password: ""
-    })
+    setError("");
+    setIsSubmitting(true);
+    try {
+      await loginUser({ email: userLogin.username, password: userLogin.password });
+      toast.success("You’re signed in.");
+      setIsOpen(false);
+      setUserLogin({ username: "", password: "" });
+    } catch (submitError) {
+      setError(submitError.message || "We couldn't sign you in. Please try again.");
+      toast.error(submitError.message || "We couldn't sign you in. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setUserLogin({ ...userLogin, [name]: value })
+    setUserLogin((previous) => ({ ...previous, [name]: value }))
+    setError("");
 }
 
 
@@ -84,39 +82,44 @@ function Pay() {
             </div>
 
             {/* Form */}
-            <form action="" className='grid, lg:grid-cols-2 gap-8 lg:gap-[30px] cursor-auto mt-4 p-5 lg:mt-8' onSubmit={submitForm}>
+            <form action="" className='grid lg:grid-cols-2 gap-8 lg:gap-[30px] cursor-auto mt-4 p-5 lg:mt-8' onSubmit={submitForm}>
               <div className='form-control'>
                 <p className='uppercase text-black font-light'>username</p>
-                <InputField
-                  type= "text"
+                <input
+                  type="email"
                   placeholder="Enter your email"
+                  autoComplete="email"
                   value={userLogin.username}
                   name="username"
                   onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                 />
               </div>
 
               <div className='form-control'>
                 <p className='uppercase text-black font-light'>Password</p>
                 <div className='flex justify-between items-center relative'>
-                  <InputField
-                    type= {password ? "password" : "text"}
+                  <input
+                    type={password ? "password" : "text"}
                     placeholder="Enter your password"
+                    autoComplete="current-password"
                     value={userLogin.password}
                     name="password"
                     onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                   />
-                  <div className='absolute right-2'>
-                    {
-                      password ? <FaEye onClick={handleClick} /> : <FaEyeSlash onClick={handleClick} />
-                    }
-                  </div>
+                  <button type="button" aria-label={password ? "Show password" : "Hide password"} onClick={handleClick} className='absolute right-2 text-gray-600'>
+                    {password ? <FaEye /> : <FaEyeSlash />}
+                  </button>
                 </div>
-                <p className='text-[10px] text-black'>Don't have an account? <NavLink className={`text-stabucks font-medium text-[14px]`} to='/register' onClick={togglePopup} >SignUp</NavLink></p>
+                <p className='text-[10px] text-black'>Don&apos;t have an account? <NavLink className={`text-stabucks font-medium text-[14px]`} to='/register' onClick={togglePopup} >SignUp</NavLink></p>
               </div>
+              {error && <p role="alert" className="text-sm text-red-600 lg:col-span-2">{error}</p>}
               <div className='flex justify-center items-center w-full'>
-                <button type='submit' className='px-20 text-white bg-stabucks hover:bg-green-700 font-medium py-2 mt-4 mb-2 rounded-3xl'>
-                  Login
+                <button type='submit' disabled={isSubmitting} className='px-20 text-white bg-stabucks hover:bg-green-700 font-medium py-2 mt-4 mb-2 rounded-3xl disabled:opacity-60'>
+                  {isSubmitting ? "Signing in..." : "Login"}
                 </button>
               </div>
 

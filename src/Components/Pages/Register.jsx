@@ -1,211 +1,125 @@
-import React, { useState } from 'react'
-import { toast } from 'react-toastify';
-import { FaEye, FaEyeSlash  } from "react-icons/fa";
-
-// For input box
-
-const InputField = ({ placeholder, type, name, value, onChange }) => {
-  return (<input 
-    name= {name}
-    value={value}
-    placeholder={placeholder}
-    onChange={onChange}
-    type={type} 
-    className='w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500'
-  />
-)}
-
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { registerUser } from "../auth/auth.js";
 
 function Register() {
-
-  // for hide and show pass functionallty
-
-  const [passWord, setPassWord] = useState(true)
-
-  const handleClick = () => {
-    setPassWord(!passWord);
-  } 
-
-  const [confirmPassWord, setConfirmPassWord] = useState(true)
-
-  const handleClickConfirm = () => {
-    setConfirmPassWord(!confirmPassWord);
-  } 
-
-  // Form setUp
-
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
-    password: "",
     mobile: "",
+    password: "",
     confirmPassword: ""
   });
-
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
   const validateForm = () => {
-    const { email, mobile, password, confirmPassword } = formData;
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*\d)[A-Za-z\d!@#$%^&*]{8,}$/;
-
-    if (!email.includes("@")) {
-      setError("Please enter a valid email address.");
-      return false;
+    const { name, email, mobile, password, confirmPassword } = formData;
+    if (!name.trim()) {
+      return "Please enter your name.";
     }
-    if (!mobile.match(/^\d{10}$/)) {
-      setError("Please enter a valid 10-digit mobile number.");
-      return false;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return "Please enter a valid email address.";
     }
-    if (!passwordRegex.test(password)) {
-      setError(
-        "Password must be at least 8 characters long, contain 1 uppercase letter, 1 symbol, and 1 number."
-      );
-      return false;
+    if (!/^\d{10}$/.test(mobile.trim())) {
+      return "Please enter a valid 10-digit mobile number.";
+    }
+    if (!/^(?=.*[A-Z])(?=.*[^A-Za-z0-9])(?=.*\d).{8,}$/.test(password)) {
+      return "Password must be at least 8 characters and include an uppercase letter, a number, and a symbol.";
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      return "Passwords do not match.";
+    }
+    return "";
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      toast.error(validationError);
       return false;
     }
 
     setError("");
-    return true;
+    setIsSubmitting(true);
+    try {
+      await registerUser(formData);
+      toast.success("Your account has been created. Please log in.");
+      navigate("/login", { replace: true, state: { email: formData.email.trim() } });
+    } catch (submitError) {
+      setError(submitError.message || "We couldn't create your account. Please try again.");
+      toast.error(submitError.message || "We couldn't create your account. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      toast.success("Registration successful!");
-      console.log("Form Data Submitted:", formData);
-    } else {
-      toast.error(error || "Validation failed.");
-    }
-
-    setFormData({
-      email: "",
-      name: "",
-      password: "",
-      confirmPassword: "",
-      mobile: ""
-    })
-  }
-
   return (
-    <div className='min-h-screen w-full bg-starbucks-green flex flex-col items-center justify-center px-4'>
-
-      <div className='w-full bg-white rounded-t-xl h-auto p-5'>
-        
-        <div className='mt-4 px-10 mb-6'>
-          <div className='flex justify-between items-center'>
-            <div className='w-8 h-8 bg-green-600 text-white flex items-center justify-center rounded-full'>1</div>
-            <div className='flex-1 h-1 bg-green-300 mx-2'></div>
-            <div className='w-8 h-8 bg-green-600 text-white flex items-center justify-center rounded-full'>2</div>
-            <div className='flex-1 h-1 bg-gray-300 mx-2'></div>
-            <div className='w-8 h-8 bg-green-600 text-white flex items-center justify-center rounded-full'>3</div>
-            <div className='flex-1 h-1 bg-gray-300 mx-2'></div>
-          </div>
+    <section className="min-h-[65vh] bg-gray-50 px-4 py-10 sm:py-16">
+      <div className="mx-auto w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg sm:p-8">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-semibold text-starbucks-green">Create your Starbucks account</h1>
+          <p className="mt-2 text-sm text-gray-600">All fields are required.</p>
         </div>
 
-      {/* Form Section */}
-
-        <div className='bg-white p-8 rounded-lg shadow-lg w-full '>
-          <div className='mb-6 text-center'>
-            <h2 className='text-2xl font-semibold'>Login to Starbucks</h2>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="register-name" className="mb-1 block text-sm font-medium text-gray-700">Full name</label>
+            <input id="register-name" name="name" type="text" autoComplete="name" required maxLength={100} value={formData.name} onChange={handleChange} className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-600" />
           </div>
-
-          <form onSubmit={handleSubmit}>
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-
-              {/* Email Input */}
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Email ID</label>
-
-                <InputField 
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter Email ID"
-                />
-              </div>
-
-              {/* Mobile Number Input */}
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Mobile no</label>
-
-                <InputField 
-                  type="Number"
-                  name="mobile"
-                  value={formData.mobile}
-                  onChange={handleChange}
-                  placeholder="Enter Mobile Number"
-                />
-              </div>
-
-              {/* Password Input */}
-
-              <div className=''>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Enter Password</label>
-
-                <div className='relative flex w-[100%] items-center justify-between'>
-                  <InputField 
-                    type={passWord ? "password" : "text"}
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Enter Password"
-                  />
-                  <div className='absolute right-2'>
-                    {
-                      passWord ? <FaEye onClick={handleClick} />  : <FaEyeSlash onClick={handleClick} />
-                    }
-                  </div>
-                </div>
-              </div>
-
-                {/* Confirm Password Input */}
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Confirm Password</label>
-
-                <div className='relative flex w-[100%] items-center justify-between'>
-                  <InputField 
-                    type={confirmPassWord ? "password" : "text"}
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="Re-Enter Password"
-                  />
-                  <div className='absolute right-2'>
-                    {
-                      confirmPassWord ? <FaEye onClick={handleClickConfirm} />  : <FaEyeSlash onClick={handleClickConfirm} />
-                    }
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Error Message */}
-            
-            {
-              error && <p className='text-red-500 text-sm mt-4'>{error}</p>
-            }
-
-            {/* Submit Button */}
-            <div className='flex justify-center items-center w-full h-auto p-2'>
-              <button type='submit' className='w-auto mt-6 bg-green-600 text-white py-2 px-4 rounded-3xl hover:bg-green-700 focus:ring-2 focus:ring-green-500'>
-                Continue
+          <div>
+            <label htmlFor="register-email" className="mb-1 block text-sm font-medium text-gray-700">Email address</label>
+            <input id="register-email" name="email" type="email" autoComplete="email" required value={formData.email} onChange={handleChange} className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-600" />
+          </div>
+          <div>
+            <label htmlFor="register-mobile" className="mb-1 block text-sm font-medium text-gray-700">Mobile number</label>
+            <input id="register-mobile" name="mobile" type="tel" inputMode="numeric" autoComplete="tel-national" required maxLength={10} pattern="[0-9]{10}" value={formData.mobile} onChange={handleChange} className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-600" />
+          </div>
+          <div>
+            <label htmlFor="register-password" className="mb-1 block text-sm font-medium text-gray-700">Password</label>
+            <div className="relative">
+              <input id="register-password" name="password" type={showPassword ? "text" : "password"} autoComplete="new-password" required value={formData.password} onChange={handleChange} className="w-full rounded border border-gray-300 px-3 py-2 pr-11 focus:outline-none focus:ring-2 focus:ring-green-600" />
+              <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((visible) => !visible)} className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-600">
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
-          </form>
-        </div>
+            <p className="mt-1 text-xs text-gray-500">At least 8 characters, including an uppercase letter, number, and symbol.</p>
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="register-confirm-password" className="mb-1 block text-sm font-medium text-gray-700">Confirm password</label>
+            <div className="relative">
+              <input id="register-confirm-password" name="confirmPassword" type={showConfirmPassword ? "text" : "password"} autoComplete="new-password" required value={formData.confirmPassword} onChange={handleChange} className="w-full rounded border border-gray-300 px-3 py-2 pr-11 focus:outline-none focus:ring-2 focus:ring-green-600" />
+              <button type="button" aria-label={showConfirmPassword ? "Hide confirmation password" : "Show confirmation password"} onClick={() => setShowConfirmPassword((visible) => !visible)} className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-600">
+                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+          </div>
+
+          {error && <p role="alert" className="text-sm text-red-600 sm:col-span-2">{error}</p>}
+
+          <button type="submit" disabled={isSubmitting} className="rounded-full bg-green-700 px-5 py-3 font-medium text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-2">
+            {isSubmitting ? "Creating account..." : "Create account"}
+          </button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-gray-600">
+          Already have an account? <Link to="/login" className="font-medium text-green-700 underline">Log in</Link>
+        </p>
       </div>
-    </div>
-  )
+    </section>
+  );
 }
 
 export default Register
